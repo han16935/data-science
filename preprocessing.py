@@ -1,12 +1,14 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
-def preprocessing():
+def preprocess():
     df = pd.read_csv("./dataset/openpowerlifting.csv")
 
     # 1. Select features which we will use
     selected_features = ['Age', 'Sex', 'TotalKg']
     df_selected = df[selected_features].copy()
+    print('Before scaling')
+    print(df_selected.head())
 
     # 1-1. Binaryize gender column (Male : 1, Female : 0)
     df_selected.loc[:, 'Sex'] = df_selected['Sex'].map({'M': 1, 'F': 0})
@@ -18,15 +20,18 @@ def preprocessing():
     # 3. Use StandardScaler to normalize (Only age and TotalKg)
     scaler = StandardScaler()
     scaled_data = scaler.fit_transform(df_selected[['Age', 'TotalKg']])
-
-    # 3-1. Convert scaled data back to DataFrame and add the 'Sex' column back
     scaled_df = pd.DataFrame(scaled_data, columns=['Age', 'TotalKg'])
-    scaled_df['Sex'] = df_selected['Sex'].values
 
     # 3-1. See scaled data
-    print(scaled_df[['Age', 'TotalKg']].head())
+    print('\nAfter scaling')
+    print(scaled_df.head())
 
-    # 4. Return data
-    return scaled_df
+    # 4. concat scaled_df and df_selected['Sex']
+    combined_df = pd.concat([scaled_df, df_selected['Sex'].reset_index(drop=True)], axis=1)
+    print('\nAfter concat')
+    print(combined_df.head())
 
-preprocessing()
+    # 5. Return data
+    return combined_df
+
+preprocess()
